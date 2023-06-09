@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestStudent;
 use App\Models\Student;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,7 +12,15 @@ class StudentController extends Controller
 {
     public function index()
     {
-        return Student::all();
+        return Student::with('attendance')->get();
+    }
+
+    public function show(Request $request, Student $student){
+        return $student->load('attendance');
+    }
+
+    public function currentOJTs(Request $request){
+        return Student::with('attendance')->get();
     }
 
     public function store(RequestStudent $request)

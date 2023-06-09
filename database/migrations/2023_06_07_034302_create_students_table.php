@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('school_year');
             $table->string('address');
             $table->string('course');
+            $table->integer('remaining')->default(550);
             $table->timestamps();
         });
     }
