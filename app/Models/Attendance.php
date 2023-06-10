@@ -11,10 +11,15 @@ class Attendance extends Model
     use HasFactory;
 
     protected $guarded = [];
+    protected $casts = [
+        'work_time' => 'integer'
+    ];
+
 
     public function student(){
         return $this->belongsTo(Student::class);
     }
+
 
 
 
