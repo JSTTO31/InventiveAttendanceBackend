@@ -14,14 +14,14 @@ class AttendanceController extends Controller
     }
 
     public function enter(Request $request, Student $student){
-        $exists = Attendance::where('student_id', $student->id)->whereDate('created_at', '>=', Carbon::today())->exists();
+        $exists = Attendance::where('student_id', $student->id)->whereDate('created_at', '>=', Carbon::today('Asia/Manila'))->exists();
 
         if($exists){
             abort(403, 'Student already enter!');
         }
 
         $attendance = $student->attendances()->create([
-            'time_in' => now(),
+            'time_in' => Carbon::now('Asia/Manila')->subHour(),
         ]);
 
         return $attendance;
@@ -29,7 +29,7 @@ class AttendanceController extends Controller
 
     public function leave(Request $request, Student $student, Attendance $attendance){
         $now = now();
-        $work_time = Carbon::parse($now)->diffInHours(Carbon::parse($attendance->time_in));
+        $work_time = Carbon::parse($now)->floatDiffInHours(Carbon::parse($attendance->time_in));
         $attendance->time_out = $now;
         $attendance->work_time = $work_time;
         $attendance->save();
