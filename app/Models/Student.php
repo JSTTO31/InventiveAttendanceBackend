@@ -12,12 +12,8 @@ class Student extends Model
     use HasFactory;
 
     protected $guarded = [];
-
+    protected $casts = ['remaining' => 'integer'];
     protected $append = ['work_time'];
-
-    public function workTime(){
-        return 'example';
-    }
 
     public function attendance(){
         return $this->hasOne(Attendance::class)->whereDate('created_at', '>=', Carbon::today())->latest();

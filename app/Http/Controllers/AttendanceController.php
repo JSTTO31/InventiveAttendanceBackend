@@ -34,7 +34,7 @@ class AttendanceController extends Controller
         $attendance->work_time = $work_time;
         $attendance->save();
 
-        $attendance->student->remaining -= $work_time;
+        $attendance->student->remaining = $attendance->student->remaining - $work_time;
         $attendance->student->save();
 
         return $attendance;
