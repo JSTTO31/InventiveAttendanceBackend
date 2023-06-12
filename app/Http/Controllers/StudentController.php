@@ -6,13 +6,30 @@ use App\Http\Requests\RequestStudent;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class StudentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Student::with('attendance')->get();
+        $students = collect(
+            Student::with('attendance')
+            // ->where(DB::raw("first_name LIKE '%". $request->search ."%'"))
+            ->where('first_name', 'like', '%' . $request->search . '%')
+            // ->orWhere('last_name', 'LIKE', '%'.$request->search.'%')
+            ->when($request->filter == 'completed', fn($query) => $query->where('remaining', '<', 1))
+            ->when(!$request->filter, fn($query) => $query->where('remaining', '>', 0))
+            ->when($request->filter == 'all_students', fn($query) => $query)
+
+            ->paginate(10)
+        );
+        $data = $students['data'];
+        unset($students['data']);
+        return [
+            'students' => $data,
+            'pageOptions' => $students
+        ];
     }
 
     public function show(Request $request, Student $student){
