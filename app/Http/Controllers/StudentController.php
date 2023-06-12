@@ -21,7 +21,6 @@ class StudentController extends Controller
             ->when($request->filter == 'completed', fn($query) => $query->where('remaining', '<', 1))
             ->when(!$request->filter, fn($query) => $query->where('remaining', '>', 0))
             ->when($request->filter == 'all_students', fn($query) => $query)
-
             ->paginate(10)
         );
         $data = $students['data'];
@@ -37,7 +36,17 @@ class StudentController extends Controller
     }
 
     public function currentOJTs(Request $request){
-        return Student::with('attendance')->get();
+        $students = Student::with('attendance')
+        ->withCount(['attendances as work_time_total' => fn($query) => $query->select(DB::raw('SUM(attendances.work_time)'))])
+        ->where('remaining', '>', 0)
+        ->limit(5)->get();
+        $numberOfStudents = DB::table('students')->select(DB::raw('COUNT(id) as total'))->first();
+        $remaining = DB::table('students')->where('remaining', '>', 0)->select(DB::raw('COUNT(id) as total'))->first();
+        return [
+            'students' => $students,
+            'number_of_students' => $numberOfStudents->total,
+            'remaining' => $remaining->total
+        ];
     }
 
     public function store(RequestStudent $request)

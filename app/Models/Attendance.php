@@ -16,8 +16,6 @@ class Attendance extends Model
     ];
 
 
-    protected $casts = ['work_time' => 'integer'];
-
     public function student(){
         return $this->belongsTo(Student::class);
     }
