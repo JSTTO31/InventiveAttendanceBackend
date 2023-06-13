@@ -6,11 +6,22 @@ use App\Models\Attendance;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
     public function index(){
         return Attendance::all();
+    }
+
+    public function student_attendances(Student $student){
+        $student = $student->load('attendances');
+        $attendances = Attendance::whereMonth('created_at', Carbon::now('Asia/Manila')->format('m'))->get();
+        $work_time_total = Attendance::where('student_id', $student->id)->select(DB::raw("SUM(work_time) as total"))->first();
+        return [
+            'attendances' => $attendances,
+            'work_time_total' => $work_time_total->total
+        ];
     }
 
     public function enter(Request $request, Student $student){
@@ -33,8 +44,7 @@ class AttendanceController extends Controller
         $attendance->time_out = $now;
         $attendance->work_time = $work_time;
         $attendance->save();
-
-        $attendance->student->remaining = $attendance->student->remaining - $work_time;
+        $attendance->student->remaining -= $work_time;
         $attendance->student->save();
 
         return $attendance;

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -24,6 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/students/current-ojts', [StudentController::class, 'currentOJTs']);
 Route::apiResource('students', StudentController::class);
 Route::get('/attendances', [AttendanceController::class, 'index']);
+Route::get('/student/{student}/attendances', [AttendanceController::class, 'student_attendances']);
 Route::post('student/{student}/attendances', [AttendanceController::class, 'enter']);
 Route::post('student/{student}/attendances/absent', [AttendanceController::class, 'absent']);;
 Route::put('student/{student}/attendances/{attendance}/leave', [AttendanceController::class, 'leave']);
