@@ -15,8 +15,7 @@ class AttendanceController extends Controller
     }
 
     public function student_attendances(Student $student){
-        $student = $student->load('attendances');
-        $attendances = Attendance::whereMonth('created_at', Carbon::now('Asia/Manila')->format('m'))->get();
+        $attendances = Attendance::where('student_id', $student->id)->whereMonth('created_at', Carbon::now('Asia/Manila')->format('m'))->get();
         $work_time_total = Attendance::where('student_id', $student->id)->select(DB::raw("SUM(work_time) as total"))->first();
         return [
             'attendances' => $attendances,
