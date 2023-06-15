@@ -4,6 +4,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\StudentController;
 use App\Models\Attendance;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +32,5 @@ Route::get('/student/{student}/attendances', [AttendanceController::class, 'stud
 Route::post('student/{student}/attendances', [AttendanceController::class, 'enter']);
 Route::post('student/{student}/attendances/absent', [AttendanceController::class, 'absent']);;
 Route::put('student/{student}/attendances/{attendance}/leave', [AttendanceController::class, 'leave']);
-
 
 

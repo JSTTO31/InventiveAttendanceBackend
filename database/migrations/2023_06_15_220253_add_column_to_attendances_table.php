@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('students', function (Blueprint $table) {
-            $table->dropColumn('remaining');
+        Schema::table('attendances', function (Blueprint $table) {
+            $table->string('late_time')->nullable();
+            $table->boolean('policy')->default(false);
         });
     }
 
@@ -21,9 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('students', function (Blueprint $table) {
-            $table->string('remaining')->default(550);
-
+        Schema::table('attendances', function (Blueprint $table) {
+            $table->dropColumn('late_time');
+            $table->dropColumn('policy');
         });
     }
 };
