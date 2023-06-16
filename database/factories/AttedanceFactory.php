@@ -10,26 +10,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class AttedanceFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    public static $counter = 1;
+
+
     public function definition(): array
     {
-        // $table->id();
-        // $table->foreignId('student_id');
-        // $table->date('time_in')->nullable();
-        // $table->date('time_out')->nullable();
-        // $table->string('work_time')->nullable();
-        // $table->date('is_absent')->default(false);
-        // $table->timestamps();
-        $currentDate = Carbon::make($this->faker->dateTimeBetween('6/1/2023', '6/30/2023', 'Asia/Manila'));
 
+        $currentDate = Carbon::today()->addDay(self::$counter)->addHours(9);
+        $currentTime = Carbon::today()->addDay(self::$counter)->addHours(18);
+
+        self::$counter++;
         return [
             'student_id' => 1,
             'time_in' => $currentDate,
-            'time_out' => $currentDate->addHours(6),
+            'time_out' => $currentTime,
             'work_time' => 6,
         ];
     }

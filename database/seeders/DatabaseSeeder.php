@@ -22,7 +22,10 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        \App\Models\Attendance::whereDate('created_at', '>=', Carbon::today())->delete();
-        // Attendance::factory()->count(20)->create();
+        // \App\Models\Attendance::whereDate('created_at', '>=', Carbon::today())->delete();
+        Attendance::factory()->count(10)->create();
+
+
+        // \App\Models\Attendance::fac
     }
 }
