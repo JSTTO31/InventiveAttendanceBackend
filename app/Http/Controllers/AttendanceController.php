@@ -71,4 +71,8 @@ class AttendanceController extends Controller
 
         return $attendance;
     }
+
+    public function manual(Request $request, Student $student){
+
+    }
 }
