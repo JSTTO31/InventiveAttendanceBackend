@@ -30,13 +30,13 @@ class AttendanceController extends Controller
         }
 
         $attendance = $student->attendances()->create([
-            'time_in' => Carbon::now('Asia/Manila')->subHour(),
+            'time_in' => Carbon::now('Asia/Manila'),
             'policy' => $request->policy ?? false,
-            'late_time' => $request->policy ? Carbon::now()->floatDiffInHours(Carbon::today()->addHours(9)) : null,
+            'late_time' => $request->policy ? Carbon::now()->floatDiffInHours(Carbon::today()->addHours(9)) * 2 : null,
         ]);
 
         if($request->policy){
-            $student->remaining += Carbon::now()->floatDiffInHours(Carbon::today()->addHours(9)) * 2;
+            $student->remaining += Carbon::now()->floatDiffInHours(Carbon::today()->addHours(9));
             $student->save();
         }
 
@@ -47,7 +47,7 @@ class AttendanceController extends Controller
     }
 
     public function leave(Request $request, Student $student, Attendance $attendance){
-        $now = now();
+        $now = Carbon::today()->addHours(18);
         $work_time = Carbon::parse($now)->floatDiffInHours(Carbon::parse($attendance->time_in));
         $attendance->time_out = $now;
         $attendance->work_time = $work_time;
