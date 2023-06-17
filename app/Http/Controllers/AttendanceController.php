@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ManualAttendanceRequest;
 use App\Models\Attendance;
 use App\Models\Student;
 use Carbon\Carbon;
@@ -72,7 +73,7 @@ class AttendanceController extends Controller
         return $attendance;
     }
 
-    public function manual(Request $request, Student $student){
+    public function manual(ManualAttendanceRequest $request, Student $student){
 
     }
 }
