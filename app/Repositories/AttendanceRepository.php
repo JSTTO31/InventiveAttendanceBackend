@@ -76,7 +76,7 @@ class AttendanceRepository
     public function manual(Student $student){
         $request = request();
         $currentDate = Carbon::parse($request->time_in)->format('Y-m-d');
-        $attendance = Attendance::where('student_id', $student->id)->whereDate('created_at', '>=', $currentDate)->first();
+        $attendance = Attendance::where('student_id', $student->id)->whereDate('created_at', $currentDate)->first();
 
         if($attendance){
             $attendance->update([
@@ -84,7 +84,7 @@ class AttendanceRepository
                 'time_out' =>  $request->option != 'absent' ? $request->time_out : null,
                 'late_time' =>  $request->option != 'absent' && $request->option == 'policy' ? $this->getLateTime($request->time_in) : null,
                 'work_time' =>  $request->option != 'absent' ? $this->getWorkTime($request->time_in, $request->time_out) : null,
-                'absent' => $request->option != 'absent' ? false : true,
+                'is_absent' => $request->option != 'absent' ? false : true,
                 'policy' => $request->option == 'policy' ? true : false,
             ]);
 
@@ -95,7 +95,7 @@ class AttendanceRepository
                 'time_out' =>  $request->option != 'absent' ? $request->time_out : null,
                 'late_time' =>  $request->option != 'absent' && $request->option == 'policy' ? $this->getLateTime($request->time_in) : null,
                 'work_time' =>  $request->option != 'absent' ? $this->getWorkTime($request->time_in, $request->time_out) : null,
-                'absent' => $request->option != 'absent' ? false : true,
+                'is_absent' => $request->option != 'absent' ? false : true,
                 'policy' => $request->option == 'policy' ? true : false,
                 'created_at' => $request->time_in
             ]);

@@ -10,7 +10,16 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'time_in'  ,
+        'time_out',
+        'late_time',
+        'work_time' ,
+        'is_absent' ,
+        'policy',
+        'created_at',
+        'student_id'
+    ];
     protected $casts = [
         'work_time' => 'integer'
     ];
