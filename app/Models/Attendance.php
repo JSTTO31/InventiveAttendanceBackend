@@ -20,7 +20,4 @@ class Attendance extends Model
         return $this->belongsTo(Student::class);
     }
 
-
-
-
 }

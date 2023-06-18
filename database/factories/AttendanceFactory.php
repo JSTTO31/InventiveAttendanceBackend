@@ -24,6 +24,7 @@ class AttendanceFactory extends Factory
             'time_in' => $currentDate,
             'time_out' => $currentDate->addHours(6),
             'work_time' => 6,
+            'created_at' => $currentDate
         ];
     }
 }

@@ -5,75 +5,40 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ManualAttendanceRequest;
 use App\Models\Attendance;
 use App\Models\Student;
+use App\Repositories\AttendanceRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
+    public $attendanceRepository;
+
+    public function __construct(){
+        $this->attendanceRepository = new AttendanceRepository();
+    }
+
     public function index(){
-        return Attendance::all();
+        return $this->attendanceRepository->getAll();
     }
 
     public function student_attendances(Student $student){
-        $attendances = Attendance::where('student_id', $student->id)->whereMonth('created_at', Carbon::now('Asia/Manila')->format('m'))->get();
-        $work_time_total = Attendance::where('student_id', $student->id)->select(DB::raw("SUM(work_time) as total"))->first();
-        return [
-            'attendances' => $attendances,
-            'work_time_total' => $work_time_total->total
-        ];
+       return $this->attendanceRepository->getStudentAttendances($student->id);
     }
 
     public function enter(Request $request, Student $student){
-        $exists = Attendance::where('student_id', $student->id)->whereDate('created_at', '>=', Carbon::today('Asia/Manila'))->exists();
-        if($exists){
-            abort(403, 'Student already enter!');
-        }
-
-        $attendance = $student->attendances()->create([
-            'time_in' => Carbon::now('Asia/Manila'),
-            'policy' => $request->policy ?? false,
-            'late_time' => $request->policy ? Carbon::now()->floatDiffInHours(Carbon::today()->addHours(9)) * 2 : null,
-        ]);
-
-        if($request->policy){
-            $student->remaining += Carbon::now()->floatDiffInHours(Carbon::today()->addHours(9));
-            $student->save();
-        }
-
-        return [
-            'attendance' => $attendance,
-            'remaining' => $student->remaining,
-        ];
+        return $this->attendanceRepository->login($student);
     }
 
     public function leave(Request $request, Student $student, Attendance $attendance){
-        $now = Carbon::today()->addHours(18);
-        $work_time = Carbon::parse($now)->floatDiffInHours(Carbon::parse($attendance->time_in));
-        $attendance->time_out = $now;
-        $attendance->work_time = $work_time;
-        $attendance->save();
-        $attendance->student->remaining -= $work_time;
-        $attendance->student->save();
-
-        return $attendance;
+        return $this->attendanceRepository->logout($student, $attendance);
     }
 
     public function absent(Request $request, Student $student){
-        $exists = Attendance::where('student_id', $student->id)->whereDate('created_at', '>=', Carbon::today())->exists();
-
-        if($exists){
-            abort(403, 'Student already have record!');
-        }
-
-        $attendance = $student->attendances()->create([
-            'is_absent' => true,
-        ]);
-
-        return $attendance;
+        return $this->attendanceRepository->absent($student);
     }
 
     public function manual(ManualAttendanceRequest $request, Student $student){
-
+       return $this->attendanceRepository->manual($student);
     }
 }
