@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\Attendance;
+use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -15,6 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        Student::factory(10)->create();
         // \App\Models\User::factory(10)->create();
 
         // \App\Models\User::factory()->create([
@@ -22,7 +24,7 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        \App\Models\Attendance::whereDate('created_at', '>=', Carbon::today())->delete();
+        // \App\Models\Attendance::whereDate('created_at', '>=', Carbon::today())->delete();
         // Attendance::factory()->count(10)->create();
 
 

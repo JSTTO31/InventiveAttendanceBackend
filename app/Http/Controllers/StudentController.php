@@ -13,6 +13,7 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
+        // return "index";
         $students = collect(
             Student::with('attendance')
             // ->where(DB::raw("first_name LIKE '%". $request->search ."%'"))
@@ -32,6 +33,7 @@ class StudentController extends Controller
     }
 
     public function show(Request $request, Student $student){
+        // return "show";
         return $student->load('attendance');
     }
 
@@ -51,6 +53,7 @@ class StudentController extends Controller
 
     public function store(RequestStudent $request)
     {
+        return "store";
         $base_path = $request->getSchemeAndHttpHost() . '/storage/profiles/';
         $image = $request->gender == 'male' ? $base_path . 'default-male.png' : $base_path . 'default-female.png';
 

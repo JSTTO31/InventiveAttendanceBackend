@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SubCategoryController;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -33,5 +36,8 @@ Route::post('student/{student}/attendances', [AttendanceController::class, 'ente
 Route::post('student/{student}/attendances/manual', [AttendanceController::class, 'manual']);
 Route::post('student/{student}/attendances/absent', [AttendanceController::class, 'absent']);;
 Route::put('student/{student}/attendances/{attendance}/leave', [AttendanceController::class, 'leave']);
+Route::apiResource('category', CategoryController::class);
+Route::apiResource('category.sub_categories', SubCategoryController::class);
+Route::apiResource('sub_category.courses', CourseController::class);
 
 
