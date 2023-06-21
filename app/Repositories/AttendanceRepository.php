@@ -75,7 +75,7 @@ class AttendanceRepository
 
     public function manual(Student $student){
         $request = request();
-        $currentDate = Carbon::parse($request->time_in)->format('Y-m-d');
+        $currentDate = Carbon::parse($request->time_in, 'Asia/Manila')->format('Y-m-d');
         $attendance = Attendance::where('student_id', $student->id)->whereDate('created_at', $currentDate)->first();
 
         if($attendance){
