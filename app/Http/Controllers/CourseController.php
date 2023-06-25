@@ -30,7 +30,7 @@ class CourseController extends Controller
             'image' => ['required', 'mimes:png,jpg'],
         ]);
 
-        $image = $request->file('image')->store('courses', 'public');Z
+        $image = $request->file('image')->store('courses', 'public');
         $url = URL::to('/storage/' . $image);
 
         $course = $subCategory->courses()->create([
