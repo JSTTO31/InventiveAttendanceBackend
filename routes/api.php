@@ -36,8 +36,10 @@ Route::post('student/{student}/attendances', [AttendanceController::class, 'ente
 Route::post('student/{student}/attendances/manual', [AttendanceController::class, 'manual']);
 Route::post('student/{student}/attendances/absent', [AttendanceController::class, 'absent']);;
 Route::put('student/{student}/attendances/{attendance}/leave', [AttendanceController::class, 'leave']);
-Route::apiResource('category', CategoryController::class);
-Route::apiResource('category.sub_categories', SubCategoryController::class);
+Route::apiResource('categories', CategoryController::class);
+Route::put('sub_categories/{sub_category}', [SubCategoryController::class, 'update']);
+Route::get('sub_categories', [SubCategoryController::class, 'index']);
+Route::apiResource('category.sub_categories', SubCategoryController::class)->only(['store', 'destroy']);
 Route::apiResource('sub_category.courses', CourseController::class);
 
 

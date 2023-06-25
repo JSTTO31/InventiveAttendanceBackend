@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\SubCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class CourseController extends Controller
 {
@@ -24,15 +25,21 @@ class CourseController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'number_of_session' => 'required',
-            'description' => 'required'
+            'number_of_session' => ['required', 'min:1', 'max:5'],
+            'description' => 'required',
+            'image' => ['required', 'mimes:png,jpg'],
         ]);
+
+        $image = $request->file('image')->store('courses', 'public');Z
+        $url = URL::to('/storage/' . $image);
 
         $course = $subCategory->courses()->create([
              'name' => $request->name,
              'number_of_session' => $request->number_of_session,
-             'description' => $request->description
+             'description' => $request->description,
+             'image' => $url,
             ]);
+
         return $course;
 
     //     $course = Course::create([
@@ -61,6 +68,8 @@ class CourseController extends Controller
             'description' => 'description'
         ]);
         $course = Course::where('id', $course->id)->update(['name' => $request->name, 'number_of_session' => $request->number_of_session, 'description' => $request->description]);
+
+        return $course;
     }
 
     /**
