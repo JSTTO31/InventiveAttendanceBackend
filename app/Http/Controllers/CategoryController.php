@@ -13,7 +13,18 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::with('sub_categories.courses')->get();
-        return $categories;
+        return $categories->map(function($category){
+            $category = collect($category);
+            return [
+                ...$category,
+                'sub_categories' => collect($category['sub_categories'])->map(function($sub_category){
+                    return [...$sub_category, 'courses' => collect(($sub_category['courses']))->map(function($course) use ($sub_category){
+                        unset($sub_category['courses']);
+                        return [...$course, 'sub_category' => $sub_category];
+                    })];
+                }),
+            ];
+        });
     }
 
     /**

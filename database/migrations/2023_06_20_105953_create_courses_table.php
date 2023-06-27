@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('image')->nullable();
             $table->integer('number_of_session');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

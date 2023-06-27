@@ -26,7 +26,6 @@ class CourseController extends Controller
         $request->validate([
             'name' => 'required',
             'number_of_session' => ['required', 'min:1', 'max:5'],
-            'description' => 'required',
             'image' => ['required', 'mimes:png,jpg'],
         ]);
 
@@ -41,12 +40,6 @@ class CourseController extends Controller
             ]);
 
         return $course;
-
-    //     $course = Course::create([
-    //     'name' => $request->name,
-    //     'number_of_session' => $request->number_of_session,
-    //     'description' => $request->description
-    // ]);
     }
 
     /**
@@ -60,14 +53,14 @@ class CourseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Course $course)
+    public function update(Request $request, SubCategory $subCategory, Course $course)
     {
         $request->validate([
             'name' => 'required',
-            'number_of_session' => 'number_of_session',
-            'description' => 'description'
+            'number_of_session' => ['required', 'min:1', 'max:5'],
+            'sub_category_id' => ['required']
         ]);
-        $course = Course::where('id', $course->id)->update(['name' => $request->name, 'number_of_session' => $request->number_of_session, 'description' => $request->description]);
+        $course = Course::where('id', $course->id)->update($request->only(['name', 'number_of_session', 'sub_category_id', 'description']));
 
         return $course;
     }
@@ -75,8 +68,10 @@ class CourseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Course $course)
+    public function destroy(SubCategory $subCategory, Course $course)
     {
         $course->delete();
+
+        return response(null);
     }
 }
