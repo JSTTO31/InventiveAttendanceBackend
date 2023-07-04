@@ -18,7 +18,8 @@ class Attendance extends Model
         'is_absent' ,
         'policy',
         'created_at',
-        'student_id'
+        'student_id',
+        'is_event'
     ];
     protected $casts = [
         'work_time' => 'integer'

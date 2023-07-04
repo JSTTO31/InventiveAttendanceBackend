@@ -17,7 +17,9 @@ class RequestStudent extends FormRequest
             'school_name' => ['required'],
             'school_year' => ['required'],
             'address' => ['required'],
-            'course' => ['required']
+            'course' => ['required'],
+            'remaining' => ['required', 'integer'],
+            'position' => ['required', 'in:Web Developer, Graphic Designer, Video Editor'],
         ];
     }
 }

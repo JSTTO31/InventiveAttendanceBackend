@@ -9,23 +9,24 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceRepository
 {
-
-    public function __construct(){
-
-    }
-
     public function getAll(){
         return Attendance::latest()->get();
     }
 
     public function getStudentAttendances($student_id){
-        $attendances = Attendance::where('student_id', $student_id)->whereMonth('created_at', Carbon::now('Asia/Manila')->format('m'))->get();
+        $attendances = Attendance::where('student_id', $student_id)
+        ->select('attendances.*', DB::raw("strftime('%m', created_at) AS month"))
+        ->get();
 
         $work_time_total = Attendance::where('student_id', $student_id)->select(DB::raw("SUM(work_time) as total"))->first();
 
+        $late_time_total = Attendance::where('student_id', $student_id)->select(DB::raw("SUM(late_time) as total"))->first();
+
         return [
             'attendances' => $attendances,
-            'work_time_total' => $work_time_total->total
+            'monthly_attendances' => $attendances->groupBy('month'),
+            'work_time_total' => $work_time_total->total ?? 0,
+            'late_time_total' => $late_time_total->total * 2 ?? 0,
         ];
     }
 
@@ -114,4 +115,5 @@ class AttendanceRepository
     public function getWorkTime($time_in, $time_out){
         return Carbon::parse($time_out)->floatDiffInHours(Carbon::parse($time_in));
     }
+
 }

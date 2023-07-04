@@ -20,4 +20,8 @@ class Course extends Model
     public function sub_category(){
         return $this->belongsTo(SubCategory::class);
     }
+
+    public function attendances(){
+        return $this->hasMany(Attendance::class);
+    }
 }
