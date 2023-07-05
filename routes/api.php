@@ -30,6 +30,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::delete('/course/{course}/student/{student}/remove_attendee', [CourseController::class, 'remove_attendee']);
     Route::post('/students/{student}/change-profile', [ImageController::class, 'changeProfile']);
     Route::post('/sub_category/{sub_category}/courses/{course}/change-image', [ImageController::class, 'changeCourseImage']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
 });
 
 
