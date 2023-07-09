@@ -5,9 +5,11 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\Attendance;
+use App\Models\Course;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -30,6 +32,20 @@ class DatabaseSeeder extends Seeder
 
         // \App\Models\Attendance::fac
 
+        // \App\Models\Student::all()->each(function(Student $student){
+        //     $path =  Str::replace('127.0.0.1', '192.168.100.107',$student->image);
 
+        //     $student->update([
+        //         'image' => $path,
+        //     ]);
+        // });
+
+        \App\Models\Course::all()->each(function(Course $course){
+            $path =  Str::replace('127.0.0.1', '192.168.100.107', $course->image);
+
+            $course->update([
+                'image' => $path,
+            ]);
+        });
     }
 }
