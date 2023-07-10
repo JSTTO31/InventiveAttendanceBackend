@@ -1,3 +1,4 @@
+composer self-update --2
 #!/usr/bin/env bash
 echo 'Running composer'
 composer global require hirak/prestissimo
