@@ -32,16 +32,16 @@ class DatabaseSeeder extends Seeder
 
         // \App\Models\Attendance::fac
 
-        \App\Models\Student::all()->each(function(Student $student){
-            $path =  Str::replace('localhost', '192.168.254.162',$student->image);
+        // \App\Models\Student::all()->each(function(Student $student){
+        //     $path =  Str::replace('localhost', '192.168.254.162',$student->image);
 
-            $student->update([
-                'image' => $path,
-            ]);
-        });
+        //     $student->update([
+        //         'image' => $path,
+        //     ]);
+        // });
 
         \App\Models\Course::all()->each(function(Course $course){
-            $path =  Str::replace('127.0.0.1', '192.168.254.162', $course->image);
+            $path =  Str::replace('http://192.168.254.162:8000/', 'https://www.inventivemedia.com.ph/ojt/', $course->image);
 
             $course->update([
                 'image' => $path,

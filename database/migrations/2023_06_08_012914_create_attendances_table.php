@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('time_in')->nullable();
             $table->date('time_out')->nullable();
             $table->string('work_time')->nullable();
-            $table->date('is_absent')->default(false);
+            $table->boolean('is_absent')->default(false);
             $table->timestamps();
         });
     }

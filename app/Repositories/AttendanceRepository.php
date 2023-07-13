@@ -15,7 +15,7 @@ class AttendanceRepository
 
     public function getStudentAttendances($student_id){
         $attendances = Attendance::where('student_id', $student_id)
-        ->select('attendances.*', DB::raw("strftime('%m', created_at) AS month"))
+        ->select('attendances.*', DB::raw("month(created_at) AS month"))
         ->get();
 
         $work_time_total = Attendance::where('student_id', $student_id)->select(DB::raw("SUM(work_time) as total"))->first();
@@ -26,7 +26,7 @@ class AttendanceRepository
             'attendances' => $attendances,
             'monthly_attendances' => $attendances->groupBy('month'),
             'work_time_total' => $work_time_total->total ?? 0,
-            'late_time_total' => $late_time_total->total * 2 ?? 0,
+            'late_time_total' => $late_time_total->total ?? 0,
         ];
     }
 
@@ -51,9 +51,8 @@ class AttendanceRepository
     }
 
     public function logout(Student $student, Attendance $attendance){
-        $now = Carbon::today()->addHours(18);
-        $attendance->time_out = $now;
-        $attendance->work_time = $this->getWorkTime($attendance->time_in, $now);
+        $attendance->time_out = now('Asia/Manila');
+        $attendance->work_time = $this->getWorkTime($attendance->time_in, now('Asia/Manila'));
         $attendance->save();
 
         return $attendance;
@@ -81,8 +80,8 @@ class AttendanceRepository
 
         if($attendance){
             $attendance->update([
-                'time_in' => $request->option != 'absent' ? $request->time_in : null,
-                'time_out' =>  $request->option != 'absent' ? $request->time_out : null,
+                'time_in' => $request->option != 'absent' ? Carbon::parse($request->time_in)->setTimezone('Asia/Manila') : null,
+                'time_out' =>  $request->option != 'absent' ? Carbon::parse($request->time_out)->setTimezone('Asia/Manila') : null,
                 'late_time' =>  $request->option != 'absent' && $request->option == 'policy' ? $this->getLateTime($request->time_in) : null,
                 'work_time' =>  $request->option != 'absent' ? $this->getWorkTime($request->time_in, $request->time_out) : null,
                 'is_absent' => $request->option != 'absent' ? false : true,
@@ -92,14 +91,16 @@ class AttendanceRepository
             return $attendance;
         }else{
             $attendance = $student->attendances()->create([
-                'time_in' => $request->option != 'absent' ? $request->time_in : null,
-                'time_out' =>  $request->option != 'absent' ? $request->time_out : null,
+                'time_in' => $request->option != 'absent' ? Carbon::parse($request->time_in)->setTimezone('Asia/Manila') : null,
+                'time_out' =>  $request->option != 'absent' ? Carbon::parse($request->time_out)->setTimezone('Asia/Manila') : null,
                 'late_time' =>  $request->option != 'absent' && $request->option == 'policy' ? $this->getLateTime($request->time_in) : null,
                 'work_time' =>  $request->option != 'absent' ? $this->getWorkTime($request->time_in, $request->time_out) : null,
                 'is_absent' => $request->option != 'absent' ? false : true,
                 'policy' => $request->option == 'policy' ? true : false,
                 'created_at' => $request->time_in
             ]);
+
+            $attendance->reset();
 
             return $attendance;
         }
@@ -113,7 +114,16 @@ class AttendanceRepository
     }
 
     public function getWorkTime($time_in, $time_out){
-        return Carbon::parse($time_out)->floatDiffInHours(Carbon::parse($time_in));
+        $time_in_hour = (int) Carbon::parse($time_in,)->setTimezone('Asia/Manila')->format('H');
+        $time_in_minute = (int) '.' . Carbon::parse($time_in,)->setTimezone('Asia/Manila')->format('s');
+        $time_out_hour = (int) Carbon::parse($time_out,)->setTimezone('Asia/Manila')->format('H');
+        $time_out_minute = (int) '.' . Carbon::parse($time_out,)->setTimezone('Asia/Manila')->format('s');
+
+        if((int)Carbon::parse($time_in)->format('M') >= 12){
+            return Carbon::parse($time_out)->floatDiffInHours(Carbon::parse($time_in));
+        }
+
+        return Carbon::parse($time_out)->floatDiffInHours(Carbon::parse($time_in)) - 1;
     }
 
 }

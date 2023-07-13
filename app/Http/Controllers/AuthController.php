@@ -37,12 +37,24 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->email)->first();
-        $token = $user->createToken('example-token')->plainTextToken;
+        $token = $user->createToken('inventive-media-token')->plainTextToken;
 
         return [
             'user' => $user,
             'token' => $token,
         ];
+    }
+
+    public function check_credentials(Request $request){
+        $request->validate(['email' => ['required'], 'password' => ['required']]);
+
+        if(!Auth::attempt(['email' => $request->email, 'password' => $request->password])){
+            return [
+                'Sorry, the credentials is incorrect!'
+            ];
+        }else{
+            return [];
+        }
     }
 
     public function logout(Request $request){

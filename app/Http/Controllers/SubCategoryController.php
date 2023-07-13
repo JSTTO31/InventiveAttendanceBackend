@@ -14,8 +14,14 @@ class SubCategoryController extends Controller
      */
     public function index()
     {
-        $sub_categories = DB::table('sub_categories')->join('categories', 'sub_categories.category_id', '=', 'categories.id')->select('sub_categories.*', 'categories.name as category_name')->get();
-        return $sub_categories;
+        $sub_categories = collect(DB::table('sub_categories')->join('categories', 'sub_categories.category_id', '=', 'categories.id')->select('sub_categories.*', 'categories.name as category_name')->paginate(10));
+        $data = $sub_categories['data'];
+        unset($sub_categories['data']);
+
+        return [
+            'sub_categories' => $data,
+            'paginationOptions' => $sub_categories,
+        ];
     }
 
     /**
