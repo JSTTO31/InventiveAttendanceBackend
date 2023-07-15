@@ -39,6 +39,6 @@ class AttendanceController extends Controller
     }
 
     public function manual(ManualAttendanceRequest $request, Student $student){
-       return $this->attendanceRepository->manual($student);
+       return $this->attendanceRepository->manual($student, $request);
     }
 }

@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Student::factory(10)->create();
+        // Student::factory(10)->create();
         // \App\Models\User::factory(10)->create();
 
         // \App\Models\User::factory()->create([
@@ -32,20 +32,21 @@ class DatabaseSeeder extends Seeder
 
         // \App\Models\Attendance::fac
 
-        // \App\Models\Student::all()->each(function(Student $student){
-        //     $path =  Str::replace('localhost', '192.168.254.162',$student->image);
+        \App\Models\Student::all()->each(function(Student $student){
+            $path =  Str::replace('192.168.100.107', 'localhost',$student->image);
 
-        //     $student->update([
-        //         'image' => $path,
-        //     ]);
-        // });
-
-        \App\Models\Course::all()->each(function(Course $course){
-            $path =  Str::replace('http://192.168.254.162:8000/', 'https://www.inventivemedia.com.ph/ojt/', $course->image);
-
-            $course->update([
+            $student->update([
                 'image' => $path,
             ]);
         });
+
+        // \App\Models\Course::all()->each(function(Course $course){
+        //     // $path =  Str::replace('http://192.168.254.162:8000/', 'https://www.inventivemedia.com.ph/ojt/', $course->image);
+        //     $path =  Str::replace('http://192.168.100.107:8000', 'https://localhost:8000', $course->image);
+
+        //     $course->update([
+        //         'image' => $path,
+        //     ]);
+        // });
     }
 }
