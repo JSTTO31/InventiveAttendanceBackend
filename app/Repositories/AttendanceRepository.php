@@ -32,9 +32,10 @@ class AttendanceRepository
 
     public function login(Student $student){
         $request = request();
-        $exists = Attendance::where('student_id', $student->id)->whereDate('created_at', '>=', Carbon::today('Asia/Manila'))->exists();
+        $exists = Attendance::where('student_id', $student->id)->whereDate('created_at', Carbon::today('Asia/Manila'))->exists();
         if($exists){
             abort(403, 'Student already enter!');
+            return;
         }
 
         $attendance = $student->attendances()->create([
@@ -52,7 +53,7 @@ class AttendanceRepository
 
     public function logout(Student $student, Attendance $attendance){
         $attendance->time_out = now('Asia/Manila');
-        $attendance->work_time = $this->getWorkTime($attendance->time_in, now('Asia/Manila'));
+        $attendance->work_time = !$attendance->work_time ? $this->getWorkTime($attendance->time_in, now('Asia/Manila')) : $attendance->work_time + $this->getWorkTime($attendance->time_in, now('Asia/Manila'));
         $attendance->save();
 
         return $attendance;
@@ -81,38 +82,36 @@ class AttendanceRepository
         $time_out = Carbon::parse($request->time_out)->setTimezone('Asia/Manila');
 
 
-        if($attendance){
-            $attendance->update([
-                'work_time' =>  $request->option != 'absent' ? $this->getWorkTime($request->time_in, $request->time_out) : null,
-                'time_in' => $request->option != 'absent' ? $time_in : null,
-                'time_out' =>  $request->option != 'absent' ? $time_out : null,
-                'is_absent' => $request->option != 'absent' ? false : true,
-                'policy' => $request->option == 'policy' ? true : false,
-            ]);
-
-            $attendance->late_time = $request->option != 'absent' && $request->option == 'policy' ? $this->getLateTime($attendance->time_in) : null;
-
-
+        if($attendance && !$request->allow_relogin){
+            $attendance->time_in = $request->option != 'absent' ? $time_in : null;
+            $attendance->time_out = $request->option != 'absent' ? $time_out : null;
+            $attendance->work_time = $request->option != 'absent' ? $this->getWorkTime($time_in, $time_out) : null;
+            $attendance->is_absent = $request->option != 'absent' ? false : true;
+            $attendance->policy = $request->option == 'policy' ? true : false;
+            $attendance->late_time = $request->option != 'absent' && $request->option == 'policy' ? $this->getLateTime($time_in) : null;
             $attendance->save();
 
-            return $request->time_in;
+
+            return $attendance;
         }else{
             $attendance = $student->attendances()->create([
                 'time_in' => $request->option != 'absent' ? $time_in : null,
                 'time_out' =>  $request->option != 'absent' ? $time_out : null,
-                'work_time' =>  $request->option != 'absent' ? $this->getWorkTime($request->time_in, $request->time_out) : null,
+                'work_time' =>  $request->option != 'absent' ? (float)$this->getWorkTime($time_in, $time_out) : null,
                 'is_absent' => $request->option != 'absent' ? false : true,
                 'policy' => $request->option == 'policy' ? true : false,
-                'created_at' => $request->time_in
+                'created_at' => $time_in,
+                'late_time' => $request->option != 'absent' && $request->option == 'policy' ? $this->getLateTime($time_in) : null,
             ]);
-
-            $attendance->late_time = $request->option != 'absent' && $request->option == 'policy' ? $this->getLateTime($attendance->time_in) : null;
-            $attendance->save();
-
-            // $attendance->reset();
 
             return $attendance;
         }
+    }
+
+    public function manual_remove(Student $student, $request){
+        Attendance::whereDate('created_at', Carbon::parse($request->time_in))->where('student_id', $student->id)->delete();
+
+        return response(204);
     }
 
     public function getLateTime($time_in){
@@ -122,17 +121,52 @@ class AttendanceRepository
         return ($timeIn - $declaredTime);
     }
 
-    public function getWorkTime($time_in, $time_out){
-        $time_in = Carbon::parse($time_in);
-        $difference = Carbon::parse($time_out)->diff($time_in);
-        $minutes = strlen(((string)$difference->i)) > 1 ? (string)$difference->i : '0' . ((string)$difference->i);
-        $work_time = (float)($difference->h . '.' . $minutes);
 
-        if((int)Carbon::parse($time_in)->format('M') >= 12){
+    function getWorkTime($time_in, $time_out){
+        $request = request();
+
+        $time_in = Carbon::parse($time_in);
+        $time_out = Carbon::parse($time_out);
+
+        $time_in_hours = ((float) $time_in->format('H')) * 60;
+        $time_in_minutes = (float)$time_in_hours + (float) $time_in->format('i');
+
+        $time_out_hours = ((float) $time_out->format('H')) * 60;
+        $time_out_minutes = (float)$time_out_hours + (float) $time_out->format('i');
+
+        $hours =  (int)(($time_out_minutes - $time_in_minutes) / 60);
+        $minutes =  (($time_out_minutes - $time_in_minutes) % 60);
+
+        $work_time = (float)Carbon::now()->setHours($hours)->setMinutes($minutes)->format('H.i');
+
+
+        if(!$request->break){
             return $work_time;
         }
 
         return $work_time - 1;
     }
+
+    public function relogin(Student $student, Attendance $attendance){
+        $attendance = $student->attendances()->create([
+            'time_in' => Carbon::now('Asia/Manila'),
+            'created_at' => now(),
+        ]);
+
+        return $attendance;
+    }
+
+    // public function getWorkTime($time_in, $time_out){
+    //     $time_in = Carbon::parse($time_in);
+    //     $difference = Carbon::parse($time_out)->diff($time_in);
+    //     $minutes = strlen(((string)$difference->i)) > 1 ? (string)$difference->i : '0' . ((string)$difference->i);
+    //     $work_time = (float)($difference->h . '.' . $minutes);
+
+    //     if(((int)Carbon::parse($time_in)->format('H')) >= 12){
+    //         return $work_time;
+    //     }
+
+    //     return $work_time - 1;
+    // }
 
 }

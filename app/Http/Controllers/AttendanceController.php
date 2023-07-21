@@ -41,4 +41,19 @@ class AttendanceController extends Controller
     public function manual(ManualAttendanceRequest $request, Student $student){
        return $this->attendanceRepository->manual($student, $request);
     }
+
+    public function manual_remove(ManualAttendanceRequest $request, Student $student){
+        return $this->attendanceRepository->manual_remove($student, $request);
+     }
+
+
+    public function relogin(Request $request, Student $student, Attendance $attendance){
+        return $this->attendanceRepository->relogin($student, $attendance);
+    }
+
+    public function destroy(Request $request, Student $student, Attendance $attendance){
+        Attendance::whereDate('created_at', Carbon::parse($attendance->created_at))->delete();
+        $attendance->delete();
+        return null;
+    }
 }

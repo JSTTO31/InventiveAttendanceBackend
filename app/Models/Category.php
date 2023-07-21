@@ -14,11 +14,20 @@ class Category extends Model
         'name'
     ];
 
+    public static function boot(){
+        parent::boot();
+
+        self::deleting(function(Category $category){
+            $category->sub_categories()->delete();
+        });
+
+    }
+
 
     public function sub_categories(): RelationsHasMany
     {
         return $this->hasMany(SubCategory::class);
     }
 
-    
+
 }

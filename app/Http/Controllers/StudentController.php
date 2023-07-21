@@ -33,16 +33,23 @@ class StudentController extends Controller
         $data = $students['data'];
         unset($students['data']);
         return [
-            'students' => $data,
+            'students' => collect($data)->map(function($student){
+                $student['attendances'] = [];
+                return $student;
+            }),
             'pageOptions' => $students
         ];
     }
 
     public function show(Request $request, Student $student){
         // return "show";
-        return $student->load(['attendance' => function($query){
+        $student->load(['attendance' => function($query){
             $query->whereDate('created_at', Carbon::today());
         }]);
+
+        $student->attendances = [];
+
+        return $student;
     }
 
     public function currentOJTs(Request $request){
@@ -54,7 +61,10 @@ class StudentController extends Controller
         $numberOfStudents = DB::table('students')->select(DB::raw('COUNT(id) as total'))->first();
         $remaining = DB::table('students')->where('remaining', '>', 0)->select(DB::raw('COUNT(id) as total'))->first();
         return [
-            'students' => $students,
+            'students' => $students->each(function(Student $student) {
+                $student->attendances = [];
+                return $student;
+            }),
             'number_of_students' => $numberOfStudents->total,
             'remaining' => $remaining->total
         ];
@@ -81,9 +91,5 @@ class StudentController extends Controller
     {
         $student->delete();
         return response(null);
-    }
-
-    public function getAllStudentCourses(Request $request, ){
-
     }
 }

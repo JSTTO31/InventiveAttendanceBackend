@@ -22,7 +22,7 @@ class Attendance extends Model
         'is_event'
     ];
     protected $casts = [
-        'work_time' => 'integer'
+        'work_time' => 'float'
     ];
 
 

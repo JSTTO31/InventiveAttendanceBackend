@@ -15,20 +15,13 @@ class ImageController extends Controller
 {
     public $url;
 
-    public function __construct(){
-        // $this->url = 'https://www.inventivemedia.com.ph/ojt/';
-        $this->url = 'http://192.168.100.107:8000/storage/';
-    }
-
-
-
     public function changeProfile(ProfileImageRequest $request, Student $student){
         $image = $request->file('image')->store('profiles', 'public');
-        $url = $this->url . $image;
+        $url = url("/storage\/") . $image;
 
 
         if(!str_contains($student->image, 'default-male.png') && !str_contains($student->image, 'default-female.png')){
-            $path = Str::replace($this->url, '/', $student->image);
+            $path = Str::replace(url("/storage\/"), '/', $student->image);
             Storage::disk('public')->delete($path);
         }
 
@@ -41,9 +34,9 @@ class ImageController extends Controller
     public function changeCourseImage(Request $request, SubCategory $subCategory, Course $course){
         $request->validate(['image' => ['required', 'mimes:png,jpg']]);
         $image = $request->file('image')->store('courses', 'public');
-        $url = $this->url . $image;
+        $url = url("/storage\/") . $image;
 
-        $path = Str::replace($this->url, '/', $course->image);
+        $path = Str::replace(url("/storage\/"), '/', $course->image);
         Storage::disk('public')->delete($path);
 
         $course->image = $url;

@@ -13,6 +13,15 @@ class SubCategory extends Model
         'name'
     ];
 
+    public static function boot(){
+        parent::boot();
+
+        self::deleting(function(SubCategory $sub_category){
+            $sub_category->courses()->delete();
+        });
+
+    }
+
 
     public function courses(){
         return $this->hasMany(Course::class);

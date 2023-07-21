@@ -19,7 +19,7 @@ class RequestStudent extends FormRequest
             'address' => ['required'],
             'course' => ['required'],
             'remaining' => ['required', 'integer'],
-            'position' => ['required', 'in:Web Developer, Graphic Designer, Video Editor'],
+            'position' => ['required', 'in:Web Developer,Graphic Designer,Video Editor'],
         ];
     }
 }

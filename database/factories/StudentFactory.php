@@ -16,7 +16,7 @@ class StudentFactory extends Factory
      */
     public function definition(): array
     {
-        $gender = $this->faker->randomElement(['male', 'female']);
+         $gender = $this->faker->randomElement(['male', 'female']);
 
         $image = $gender == 'male' ? 'http://localhost:8000/storage/profiles/default-male.png' : 'http://localhost:8000/storage/profiles/default-female.png';
         return [

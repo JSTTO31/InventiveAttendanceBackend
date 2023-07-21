@@ -62,4 +62,10 @@ class AuthController extends Controller
 
         return response(null);
     }
+
+    public function change_password(Request $request){
+        $request->validate(['old_password' => ['required'], 'new_password' => ['required', 'different:old_password']]);
+
+        return abort(403);
+    }
 }
