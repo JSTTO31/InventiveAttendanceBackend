@@ -31,9 +31,12 @@ class AuthController extends Controller
         $request->validate(['email' => ['required', 'exists:users,email'], 'password' => ['required']]);
 
         if(!Auth::attempt(['email' => $request->email, 'password' => $request->password])){
-            return [
-                'message' => 'Sorry, the credentials is incorrect!',
-            ];
+            return response()->json([
+                'messages' => 'Credentials error!',
+                'errors' => [
+                    'password' => 'The password is incorrect!',
+                ],
+            ], 422);
         }
 
         $user = User::where('email', $request->email)->first();
@@ -45,27 +48,27 @@ class AuthController extends Controller
         ];
     }
 
-    public function check_credentials(Request $request){
-        $request->validate(['email' => ['required'], 'password' => ['required']]);
-
-        if(!Auth::attempt(['email' => $request->email, 'password' => $request->password])){
-            return [
-                'Sorry, the credentials is incorrect!'
-            ];
-        }else{
-            return [];
-        }
-    }
-
     public function logout(Request $request){
         $request->user()->tokens()->delete();
-
         return response(null);
     }
 
     public function change_password(Request $request){
         $request->validate(['old_password' => ['required'], 'new_password' => ['required', 'different:old_password']]);
 
-        return abort(403);
+        if(!Hash::check($request->old_password , $request->user()->password)){
+            return response()->json([
+                'messages' => 'The old password not match!',
+                'errors' => [
+                    'old_password' => 'The old password not match!',
+                ]
+            ], 422);
+        }
+
+        $user = User::where('email', $request->user()->email)->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        return $user;
     }
 }

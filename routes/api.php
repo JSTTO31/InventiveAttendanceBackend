@@ -38,9 +38,10 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::put('/change-password', [AuthController::class, 'change_password']);
-
 });
 
 
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/validation/check-credentials', [AuthController::class, 'check_credentials']);
+
+
+
