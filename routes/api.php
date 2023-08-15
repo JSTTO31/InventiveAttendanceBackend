@@ -40,7 +40,9 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::put('/change-password', [AuthController::class, 'change_password']);
 });
 
+$time_in = Carbon::parse('2023-07-06 00:40:00')->format('H.i');
 
+// dd(number_format((float)$time, 2, '.', ''));
 Route::post('/login', [AuthController::class, 'login']);
 
 

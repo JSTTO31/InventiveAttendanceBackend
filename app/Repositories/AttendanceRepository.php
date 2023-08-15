@@ -19,7 +19,6 @@ class AttendanceRepository
         ->get();
 
         $work_time_total = Attendance::where('student_id', $student_id)->select(DB::raw("SUM(work_time) as total"))->first();
-
         $late_time_total = Attendance::where('student_id', $student_id)->select(DB::raw("SUM(late_time) as total"))->first();
 
         return [
@@ -126,6 +125,11 @@ class AttendanceRepository
         $request = request();
 
         $time_in = Carbon::parse($time_in);
+
+        if($request->option == 'policy'){
+            $time_in = $time_in->addMinutes((int)substr(number_format($this->getLateTime($time_in), 2, '.', ''), 2));
+        }
+
         $time_out = Carbon::parse($time_out);
 
         $time_in_hours = ((float) $time_in->format('H')) * 60;
