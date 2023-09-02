@@ -64,4 +64,8 @@ return [
         'encrypt_cookies' => App\Http\Middleware\EncryptCookies::class,
     ],
 
+    'database' => [
+        'connection' => 'user',
+    ],
+
 ];

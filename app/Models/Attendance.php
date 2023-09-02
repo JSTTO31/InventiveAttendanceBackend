@@ -30,4 +30,8 @@ class Attendance extends Model
         return $this->belongsTo(Student::class);
     }
 
+    public function event(){
+        return $this->belongsTo(Event::class);
+    }
+
 }

@@ -12,27 +12,27 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
-        // return "index";
         $students = collect(
             Student::with(['attendance' => function($query){
                 $query->whereDate('created_at', Carbon::today());
             }])
-            // ->where(DB::raw("first_name LIKE '%". $request->search ."%'"))
+            ->withSum('attendances as work_time_total', 'work_time')
             ->where('first_name', 'like', '%' . $request->search . '%')
-            // ->orWhere('last_name', 'LIKE', '%'.$request->search.'%')
-            ->when($request->filter == 'completed', fn($query) => $query->where('remaining', '<', 1))
-            ->when(!$request->filter, fn($query) => $query->where('remaining', '>', 0))
+            ->when($request->filter == 'completed', fn($query) => $query->whereNotNull('completed_at'))
+            ->when(!$request->filter, fn($query) => $query->whereNull('completed_at'))
             ->when($request->filter == 'all_students', fn($query) => $query)
             ->when($request->course_id, function($query) use ($request){
                 $query->whereDoesntHave('attendances', function($query) use ($request) {
                     $query->where('course_id', $request->course_id);
                 });
             })
-            ->paginate(10)
+            ->paginate(5)
         );
         $data = $students['data'];
         unset($students['data']);
         return [
+            'total_students' => Student::select(DB::raw('COUNT(id) as count'))->first()['count'] ?? 0,
+            'total_remaining_students' =>  Student::whereNull('completed_at')->select(DB::raw('COUNT(id) as count'))->first()['count'] ?? 0,
             'students' => collect($data)->map(function($student){
                 $student['attendances'] = [];
                 return $student;
@@ -55,11 +55,11 @@ class StudentController extends Controller
     public function currentOJTs(Request $request){
         $students = Student::with('attendance')
         ->withCount(['attendances as work_time_total' => fn($query) => $query->select(DB::raw('SUM(attendances.work_time)'))])
-        ->where('remaining', '>', 0)
+        ->whereNull('completed_at')
         ->orderBy('work_time_total', 'desc')
         ->limit(5)->get();
         $numberOfStudents = DB::table('students')->select(DB::raw('COUNT(id) as total'))->first();
-        $remaining = DB::table('students')->where('remaining', '>', 0)->select(DB::raw('COUNT(id) as total'))->first();
+        $remaining = DB::table('students')->whereNull('completed_at')->select(DB::raw('COUNT(id) as total'))->first();
         return [
             'students' => $students->each(function(Student $student) {
                 $student->attendances = [];

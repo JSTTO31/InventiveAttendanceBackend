@@ -13,8 +13,19 @@ class AttendanceRepository
         return Attendance::latest()->get();
     }
 
+    public function getTodayAttendances(){
+        return Attendance::whereDate('created_at', Carbon::now())->get();
+    }
+
+    public function getWeeklyAttendances(){
+        $date_end = now();
+        $date_start = now()->subDay($date_end->dayOfWeek);
+
+        return Attendance::whereDate('created_at', '>=', $date_start)->whereDate('created_at', '<=', $date_end)->orderBy('created_at', 'ASC')->get();
+    }
+
     public function getStudentAttendances($student_id){
-        $attendances = Attendance::where('student_id', $student_id)
+        $attendances = Attendance::with(['event.date_time'])->where('student_id', $student_id)
         ->select('attendances.*', DB::raw("month(created_at) AS month"))
         ->get();
 
@@ -41,8 +52,9 @@ class AttendanceRepository
             'time_in' => Carbon::now('Asia/Manila'),
             'policy' => $request->policy ?? false,
             'late_time' => $request->policy ? $this->getLateTime(now()) : null,
-        ]);
+            'event_id' => null,
 
+        ]);
 
         return [
             'attendance' => $attendance,
@@ -54,6 +66,8 @@ class AttendanceRepository
         $attendance->time_out = now('Asia/Manila');
         $attendance->work_time = !$attendance->work_time ? $this->getWorkTime($attendance->time_in, now('Asia/Manila')) : $attendance->work_time + $this->getWorkTime($attendance->time_in, now('Asia/Manila'));
         $attendance->save();
+
+        $this->markAsCompleted($student->id);
 
         return $attendance;
     }
@@ -88,7 +102,10 @@ class AttendanceRepository
             $attendance->is_absent = $request->option != 'absent' ? false : true;
             $attendance->policy = $request->option == 'policy' ? true : false;
             $attendance->late_time = $request->option != 'absent' && $request->option == 'policy' ? $this->getLateTime($time_in) : null;
+            $attendance->event_id = null;
             $attendance->save();
+
+            $this->markAsCompleted($student->id);
 
 
             return $attendance;
@@ -101,7 +118,11 @@ class AttendanceRepository
                 'policy' => $request->option == 'policy' ? true : false,
                 'created_at' => $time_in,
                 'late_time' => $request->option != 'absent' && $request->option == 'policy' ? $this->getLateTime($time_in) : null,
+                'event_id' => null,
             ]);
+
+            $this->markAsCompleted($student->id);
+
 
             return $attendance;
         }
@@ -160,17 +181,11 @@ class AttendanceRepository
         return $attendance;
     }
 
-    // public function getWorkTime($time_in, $time_out){
-    //     $time_in = Carbon::parse($time_in);
-    //     $difference = Carbon::parse($time_out)->diff($time_in);
-    //     $minutes = strlen(((string)$difference->i)) > 1 ? (string)$difference->i : '0' . ((string)$difference->i);
-    //     $work_time = (float)($difference->h . '.' . $minutes);
-
-    //     if(((int)Carbon::parse($time_in)->format('H')) >= 12){
-    //         return $work_time;
-    //     }
-
-    //     return $work_time - 1;
-    // }
+    public function markAsCompleted($student_id){
+        $student = Student::where('id', $student_id)->withSum('attendances as work_time_total', 'work_time')->first();
+        if($student->work_time_total >= $student->remaining){
+            $student->completed_at = now();
+        }
+    }
 
 }

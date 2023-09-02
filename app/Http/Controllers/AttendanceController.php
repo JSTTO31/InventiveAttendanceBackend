@@ -19,7 +19,14 @@ class AttendanceController extends Controller
     }
 
     public function index(){
-        return $this->attendanceRepository->getAll();
+        return [
+            'weekly_attendances' => $this->attendanceRepository->getWeeklyAttendances(),
+            'today_attendances' => $this->attendanceRepository->getTodayAttendances()
+        ];
+    }
+
+    public function weekly_attendances(Request $request){
+        return $this->attendanceRepository->getWeeklyAttendances();
     }
 
     public function student_attendances(Student $student){
