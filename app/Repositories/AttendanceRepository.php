@@ -19,8 +19,7 @@ class AttendanceRepository
 
     public function getWeeklyAttendances(){
         $date_end = now();
-        $date_start = now()->subDay($date_end->dayOfWeek);
-
+        $date_start = now()->subDay($date_end->weekday());
         return Attendance::whereDate('created_at', '>=', $date_start)->whereDate('created_at', '<=', $date_end)->orderBy('created_at', 'ASC')->get();
     }
 
@@ -73,7 +72,7 @@ class AttendanceRepository
     }
 
     public function absent(Student $student){
-        $exists = Attendance::where('student_id', $student->id)->whereDate('created_at', '>=', Carbon::today())->exists();
+        $exists = Attendance::where('student_id', $student->id)->whereDate('created_at', now())->exists();
 
         if($exists){
             abort(403, 'Student already have record!');
@@ -94,8 +93,8 @@ class AttendanceRepository
         $time_in = Carbon::parse($request->time_in)->setTimezone('Asia/Manila');
         $time_out = Carbon::parse($request->time_out)->setTimezone('Asia/Manila');
 
-
         if($attendance && !$request->allow_relogin){
+
             $attendance->time_in = $request->option != 'absent' ? $time_in : null;
             $attendance->time_out = $request->option != 'absent' ? $time_out : null;
             $attendance->work_time = $request->option != 'absent' ? $this->getWorkTime($time_in, $time_out) : null;
@@ -148,16 +147,18 @@ class AttendanceRepository
         $time_in = Carbon::parse($time_in);
 
         if($request->option == 'policy'){
-            $time_in = $time_in->addMinutes((int)substr(number_format($this->getLateTime($time_in), 2, '.', ''), 2));
+            $time_array = explode('.', number_format($this->getLateTime($time_in), 2, '.', ''));
+            $time_in->addHours((int)$time_array[0]);
+            $time_in->addMinutes((int)$time_array[1]);
         }
 
         $time_out = Carbon::parse($time_out);
 
-        $time_in_hours = ((float) $time_in->format('H')) * 60;
-        $time_in_minutes = (float)$time_in_hours + (float) $time_in->format('i');
+        $time_in_hours = ((int) $time_in->format('H')) * 60;
+        $time_in_minutes = (int)$time_in_hours + (int) $time_in->format('i');
 
-        $time_out_hours = ((float) $time_out->format('H')) * 60;
-        $time_out_minutes = (float)$time_out_hours + (float) $time_out->format('i');
+        $time_out_hours = ((int) $time_out->format('H')) * 60;
+        $time_out_minutes = (int)$time_out_hours + (int) $time_out->format('i');
 
         $hours =  (int)(($time_out_minutes - $time_in_minutes) / 60);
         $minutes =  (($time_out_minutes - $time_in_minutes) % 60);
@@ -182,10 +183,15 @@ class AttendanceRepository
     }
 
     public function markAsCompleted($student_id){
-        $student = Student::where('id', $student_id)->withSum('attendances as work_time_total', 'work_time')->first();
-        if($student->work_time_total >= $student->remaining){
+        $student = Student::where('id', $student_id)->first();
+        $hours = (Attendance::where('student_id', $student_id)->select(DB::raw('SUM(FLOOR(work_time)) as total'))->first()->total ?? 0);
+        $minutes = round((Attendance::where('student_id', $student_id)->select(DB::raw('SUM(MOD(work_time, 1)) as total'))->first()->total ?? 0) * 100);
+        $hours = $hours + floor($minutes / 60);
+        if($hours >= $student->remaining){
             $student->completed_at = now();
+            $student->save();
         }
+
     }
 
 }

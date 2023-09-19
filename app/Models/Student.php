@@ -30,7 +30,7 @@ class Student extends Model
     }
 
     public function attendance(){
-        return $this->hasOne(Attendance::class)->whereDate('created_at', '>=', Carbon::today())->latest();
+        return $this->hasOne(Attendance::class)->whereDate('created_at', now())->latest();
     }
 
     public function attendances(){
